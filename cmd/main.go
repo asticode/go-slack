@@ -33,6 +33,16 @@ func main() {
 	// Switch on subcommand
 	switch s {
 	default:
+		// Init message
+		m := slack.Message{
+			Channel: *channel,
+			Text:    *message,
+		}
+
+		// Slack
+		if err := sl.Slack(m); err != nil {
+			l.Fatal(err)
+		}
 		break
 	}
 }

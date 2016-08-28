@@ -9,8 +9,11 @@ import (
 
 // Constants
 const (
-	RetryMax   = 5
-	RetrySleep = time.Minute
+	ColorDanger  = "danger"
+	ColorGood    = "good"
+	ColorWarning = "warning"
+	RetryMax     = 5
+	RetrySleep   = time.Minute
 )
 
 // Slack represents a Slack communicator

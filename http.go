@@ -24,6 +24,7 @@ func (o *Slack) Send(hostname string, pattern string, method string, body []byte
 	if err != nil {
 		return
 	}
+	req.Header.Add("Content-type", "application/json")
 
 	// Send request
 	resp, err = Send(req, o.HTTPClient)
