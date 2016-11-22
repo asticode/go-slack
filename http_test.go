@@ -15,8 +15,9 @@ import (
 
 func TestSendWithMaxRetries(t *testing.T) {
 	var count int
-	o := slack.Slack{
-		Logger: xlog.NopLogger,
+	s := slack.Slack{
+		Logger:     xlog.NopLogger,
+		RetrySleep: time.Nanosecond,
 	}
 	slack.Send = func(req *http.Request, httpClient *http.Client) (*http.Response, error) {
 		count++
@@ -29,19 +30,23 @@ func TestSendWithMaxRetries(t *testing.T) {
 		}
 		return &http.Response{StatusCode: http.StatusBadRequest, ProtoMinor: 4, Body: ioutil.NopCloser(strings.NewReader(""))}, nil
 	}
-	_, resp, err := o.SendWithMaxRetries("", "", "", nil, 1, time.Nanosecond)
+	s.RetryMax = 0
+	_, resp, err := s.SendWithMaxRetries("", "", "", nil)
 	assert.Error(t, err)
 	assert.Equal(t, 1, resp.ProtoMinor)
 	count = 0
-	_, resp, err = o.SendWithMaxRetries("", "", "", nil, 2, time.Nanosecond)
+	s.RetryMax = 1
+	_, resp, err = s.SendWithMaxRetries("", "", "", nil)
 	assert.Error(t, err)
 	assert.Equal(t, 2, resp.ProtoMinor)
 	count = 0
-	_, resp, err = o.SendWithMaxRetries("", "", "", nil, 3, time.Nanosecond)
+	s.RetryMax = 2
+	_, resp, err = s.SendWithMaxRetries("", "", "", nil)
 	assert.Error(t, err)
 	assert.Equal(t, 3, resp.ProtoMinor)
 	count = 0
-	_, resp, err = o.SendWithMaxRetries("", "", "", nil, 4, time.Nanosecond)
+	s.RetryMax = 3
+	_, resp, err = s.SendWithMaxRetries("", "", "", nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 4, resp.ProtoMinor)
 }

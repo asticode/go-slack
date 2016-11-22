@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"time"
 )
@@ -14,10 +15,10 @@ var Send = func(req *http.Request, httpClient *http.Client) (*http.Response, err
 }
 
 // Send sends a new authorized OHE request
-func (o *Slack) Send(hostname string, pattern string, method string, body []byte) (req *http.Request, resp *http.Response, err error) {
+func (s *Slack) Send(hostname string, pattern string, method string, body []byte) (req *http.Request, resp *http.Response, err error) {
 	// Log
 	url := hostname + pattern
-	o.Logger.Debugf("Sending Slack %s request to %s with body %s", method, url, string(body))
+	s.Logger.Debugf("Sending Slack %s request to %s with body %s", method, url, string(body))
 
 	// Create request
 	req, err = http.NewRequest(method, url, bytes.NewReader(body))
@@ -27,37 +28,45 @@ func (o *Slack) Send(hostname string, pattern string, method string, body []byte
 	req.Header.Add("Content-type", "application/json")
 
 	// Send request
-	resp, err = Send(req, o.HTTPClient)
+	if resp, err = Send(req, s.HTTPClient); err != nil {
+		s.Logger.Error(fmt.Sprintf("%s for request to %s", err, req.URL.Path))
+	}
 	return
 }
 
 // SendWithMaxRetries sends a new authorized OHE request and retries in case of specific conditions
-func (o *Slack) SendWithMaxRetries(hostname string, pattern string, method string, body []byte, retryMax int, retrySleep time.Duration) (req *http.Request, resp *http.Response, err error) {
+func (s *Slack) SendWithMaxRetries(hostname string, pattern string, method string, body []byte) (req *http.Request, resp *http.Response, err error) {
 	// Loop
-	for retriesLeft := retryMax; retriesLeft > 0; retriesLeft-- {
+	// We start at s.RetryMax + 1 so that it runs at least once even if RetryMax == 0
+	for retriesLeft := s.RetryMax + 1; retriesLeft > 0; retriesLeft-- {
 		// Send request
-		req, resp, err = o.Send(hostname, pattern, method, body)
-		if err != nil {
-			return
+		var retry bool
+		if req, resp, err = s.Send(hostname, pattern, method, body); err != nil {
+			// If error is temporary, retry
+			if opErr, ok := err.(*net.OpError); ok && opErr.Temporary() {
+				retry = true
+			} else {
+				return
+			}
 		}
 
 		// Retry if internal server or if too many requests
-		if resp.StatusCode >= http.StatusInternalServerError || resp.StatusCode == http.StatusTooManyRequests {
+		if retry || resp.StatusCode >= http.StatusInternalServerError || resp.StatusCode == http.StatusTooManyRequests {
 			// Get body
-			b, e := ioutil.ReadAll(resp.Body)
-			if e != nil {
-				err = e
+			var b []byte
+			if b, err = ioutil.ReadAll(resp.Body); err != nil {
+				s.Logger.Error(err)
 				return
 			}
 
 			// Log
-			o.Logger.Debugf("Status code %d triggered a retry, sleeping %s and retrying... (%d retries left and body %s)", resp.StatusCode, retrySleep, retriesLeft-1, string(b))
+			s.Logger.Debugf("Status code %d triggered a retry, sleeping %s and retrying... (%d retries left and body %s)", resp.StatusCode, s.RetrySleep, retriesLeft-1, string(b))
 
 			// Close response body
 			resp.Body.Close()
 
 			// Sleep
-			time.Sleep(retrySleep)
+			time.Sleep(s.RetrySleep)
 			continue
 		}
 
@@ -66,7 +75,8 @@ func (o *Slack) SendWithMaxRetries(hostname string, pattern string, method strin
 	}
 
 	// Max retries limit reached
-	err = fmt.Errorf("Max retries %d reached", retryMax)
+	err = fmt.Errorf("Max retries %d reached for request to %s", s.RetryMax, req.URL.Path)
+	s.Logger.Error(err)
 	return
 }
 
