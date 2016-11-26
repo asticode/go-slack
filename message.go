@@ -61,7 +61,7 @@ func (s *Slack) Slack(m Message) (err error) {
 	}
 
 	// Send request
-	req, resp, err := s.SendWithMaxRetries(s.IncomingWebhookURL, "", http.MethodPost, b, RetryMax, RetrySleep)
+	req, resp, err := s.SendWithMaxRetries(s.IncomingWebhookURL, "", http.MethodPost, b)
 	if err != nil {
 		return
 	}
