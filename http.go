@@ -29,7 +29,7 @@ func (s *Slack) Send(hostname string, pattern string, method string, body []byte
 
 	// Send request
 	if resp, err = Send(req, s.HTTPClient); err != nil {
-		s.Logger.Error(fmt.Sprintf("%s for request to %s", err, req.URL.Path))
+		s.Logger.Error(fmt.Sprintf("%s for request to %s", err, req.URL))
 	}
 	return
 }
@@ -75,7 +75,7 @@ func (s *Slack) SendWithMaxRetries(hostname string, pattern string, method strin
 	}
 
 	// Max retries limit reached
-	err = fmt.Errorf("Max retries %d reached for request to %s", s.RetryMax, req.URL.Path)
+	err = fmt.Errorf("Max retries %d reached for request to %s", s.RetryMax, req.URL)
 	s.Logger.Error(err)
 	return
 }
@@ -83,7 +83,7 @@ func (s *Slack) SendWithMaxRetries(hostname string, pattern string, method strin
 // ProcessResponse processes an HTTP response
 var ProcessResponse = func(req *http.Request, resp *http.Response) error {
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return fmt.Errorf("Invalid status code %v on %v", resp.StatusCode, req.URL.Path)
+		return fmt.Errorf("Invalid status code %v on %v", resp.StatusCode, req.URL)
 	}
 	return nil
 }
