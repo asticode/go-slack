@@ -56,9 +56,13 @@ func (s *Slack) SendWithMaxRetries(hostname string, pattern string, method strin
 		if retry || resp.StatusCode >= http.StatusInternalServerError || resp.StatusCode == http.StatusTooManyRequests {
 			// Get body
 			var b []byte
-			if b, err = ioutil.ReadAll(resp.Body); err != nil {
-				s.Logger.Error(err)
-				return
+			// http.Response is legit only when err == nil
+			if err == nil {
+				defer resp.Body.Close()
+				if b, err = ioutil.ReadAll(resp.Body); err != nil {
+					s.Logger.Error(err)
+					return
+				}
 			}
 
 			// Log
