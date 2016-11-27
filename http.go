@@ -45,7 +45,7 @@ func (s *Slack) SendWithMaxRetries(hostname string, pattern string, method strin
 		var retry bool
 		if req, resp, err = s.Send(hostname, pattern, method, body); err != nil {
 			// If error is temporary, retry
-			if opErr, ok := err.(*net.OpError); ok && opErr.Temporary() {
+			if netError, ok := err.(net.Error); ok && netError.Temporary() {
 				retry = true
 			} else {
 				return
