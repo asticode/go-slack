@@ -65,8 +65,10 @@ func (s *Slack) SendWithMaxRetries(hostname string, pattern string, method strin
 			}
 
 			// Log
-			s.Logger.Debugf("Sleeping %s and retrying... (%d retries left and body %s)", s.RetrySleep, retriesLeft-1, string(b))
-			time.Sleep(s.RetrySleep)
+			if retriesLeft > 1 {
+				s.Logger.Debugf("Sleeping %s and retrying... (%d retries left and body %s)", s.RetrySleep, retriesLeft-1, string(b))
+				time.Sleep(s.RetrySleep)
+			}
 			continue
 		}
 
