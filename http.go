@@ -26,7 +26,6 @@ func (s *Slack) Send(hostname string, pattern string, method string, body []byte
 		return
 	}
 	req.Header.Add("Content-type", "application/json")
-	req.Close = true
 	defer req.Body.Close()
 
 	// Send request
