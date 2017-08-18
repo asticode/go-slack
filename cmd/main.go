@@ -3,10 +3,9 @@ package main
 import (
 	"flag"
 
+	"github.com/asticode/go-astilog"
+	"github.com/asticode/go-astitools/flag"
 	"github.com/asticode/go-slack"
-	"github.com/molotovtv/go-logger"
-	"github.com/molotovtv/go-toolbox"
-	"github.com/rs/xlog"
 )
 
 // Flags
@@ -17,18 +16,17 @@ var (
 
 func main() {
 	// Get subcommand
-	s := toolbox.Subcommand()
+	s := astiflag.Subcommand()
 	flag.Parse()
 
 	// Init logger
-	l := xlog.New(logger.NewConfig(logger.FlagConfig()))
+	astilog.FlagInit()
 
 	// Init slack
 	sl := slack.New(slack.FlagConfig())
-	sl.Logger = l
 
 	// Log
-	l.Debugf("Subcommand is %s", s)
+	astilog.Debugf("Subcommand is %s", s)
 
 	// Switch on subcommand
 	switch s {
@@ -41,7 +39,7 @@ func main() {
 
 		// Slack
 		if err := sl.Slack(m); err != nil {
-			l.Fatal(err)
+			astilog.Fatal(err)
 		}
 		break
 	}

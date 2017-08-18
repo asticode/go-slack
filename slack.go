@@ -3,8 +3,6 @@ package slack
 import (
 	"net/http"
 	"time"
-
-	"github.com/rs/xlog"
 )
 
 // Constants
@@ -18,7 +16,6 @@ const (
 type Slack struct {
 	HTTPClient         *http.Client
 	IncomingWebhookURL string
-	Logger             xlog.Logger
 	RetryMax           int
 	RetrySleep         time.Duration
 }
@@ -30,7 +27,6 @@ func New(c Configuration) *Slack {
 			Timeout: c.RequestTimeout,
 		},
 		IncomingWebhookURL: c.IncomingWebhookURL,
-		Logger:             xlog.NopLogger,
 		RetryMax:           c.RetryMax,
 		RetrySleep:         c.RetrySleep,
 	}

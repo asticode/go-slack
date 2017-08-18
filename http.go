@@ -7,6 +7,8 @@ import (
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/asticode/go-astilog"
 )
 
 // Send sends an http request with a timeout
@@ -18,7 +20,7 @@ var Send = func(req *http.Request, httpClient *http.Client) (*http.Response, err
 func (s *Slack) Send(hostname string, pattern string, method string, body []byte) (req *http.Request, resp *http.Response, err error) {
 	// Log
 	url := hostname + pattern
-	s.Logger.Debugf("Sending Slack %s request to %s with body %s", method, url, string(body))
+	astilog.Debugf("Sending Slack %s request to %s with body %s", method, url, string(body))
 
 	// Create request
 	req, err = http.NewRequest(method, url, bytes.NewReader(body))
@@ -30,7 +32,7 @@ func (s *Slack) Send(hostname string, pattern string, method string, body []byte
 
 	// Send request
 	if resp, err = Send(req, s.HTTPClient); err != nil {
-		s.Logger.Error(fmt.Sprintf("%s for request to %s", err, req.URL))
+		astilog.Error(fmt.Sprintf("%s for request to %s", err, req.URL))
 	}
 	return
 }
@@ -58,14 +60,14 @@ func (s *Slack) SendWithMaxRetries(hostname string, pattern string, method strin
 			if resp != nil {
 				defer resp.Body.Close()
 				if b, err = ioutil.ReadAll(resp.Body); err != nil {
-					s.Logger.Error(err)
+					astilog.Error(err)
 					return
 				}
 			}
 
 			// Log
 			if retriesLeft > 1 {
-				s.Logger.Debugf("Sleeping %s and retrying... (%d retries left and body %s)", s.RetrySleep, retriesLeft-1, string(b))
+				astilog.Debugf("Sleeping %s and retrying... (%d retries left and body %s)", s.RetrySleep, retriesLeft-1, string(b))
 				time.Sleep(s.RetrySleep)
 			}
 			continue
@@ -77,7 +79,7 @@ func (s *Slack) SendWithMaxRetries(hostname string, pattern string, method strin
 
 	// Max retries limit reached
 	err = fmt.Errorf("Max retries %d reached for request to %s", s.RetryMax, req.URL)
-	s.Logger.Error(err)
+	astilog.Error(err)
 	return
 }
 
