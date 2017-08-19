@@ -9,16 +9,12 @@ import (
 	"time"
 
 	"github.com/asticode/go-slack"
-	"github.com/rs/xlog"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSendWithMaxRetries(t *testing.T) {
 	var count int
-	s := slack.Slack{
-		Logger:     xlog.NopLogger,
-		RetrySleep: time.Nanosecond,
-	}
+	s := slack.Slack{RetrySleep: time.Nanosecond}
 	slack.Send = func(req *http.Request, httpClient *http.Client) (*http.Response, error) {
 		count++
 		if count == 1 {
