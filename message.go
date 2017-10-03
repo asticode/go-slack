@@ -2,11 +2,7 @@ package slack
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"time"
-
-	astilog "github.com/asticode/go-astilog"
 )
 
 // Message represents a message
@@ -47,13 +43,6 @@ type Field struct {
 
 // Slack sends a message to Slack
 func (s *Slack) Slack(m Message) (err error) {
-	// Log
-	l := fmt.Sprintf("Slacking message to %s", m.Channel)
-	astilog.Debugf("[Start] %s", l)
-	defer func(now time.Time) {
-		astilog.Debugf("[End] %s in %s", l, time.Since(now))
-	}(time.Now())
-
 	// TODO Make sure texts are HTML encoded
 
 	// Encode message

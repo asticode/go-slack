@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/asticode/go-slack"
+	"github.com/molotovtv/go-slack"
 	"github.com/stretchr/testify/assert"
 )
 
