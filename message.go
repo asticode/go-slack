@@ -54,6 +54,9 @@ func (s *Slack) Slack(m Message) (err error) {
 		astilog.Debugf("[End] %s in %s", l, time.Since(now))
 	}(time.Now())
 
+	// Add channel prefix
+	m.Channel = s.ChannelPrefix + m.Channel
+
 	// TODO Make sure texts are HTML encoded
 
 	// Encode message

@@ -14,6 +14,7 @@ const (
 
 // Slack represents a Slack communicator
 type Slack struct {
+	ChannelPrefix      string
 	HTTPClient         *http.Client
 	IncomingWebhookURL string
 	RetryMax           int
@@ -23,6 +24,7 @@ type Slack struct {
 // New creates a new Slack communicator
 func New(c Configuration) *Slack {
 	o := &Slack{
+		ChannelPrefix: c.ChannelPrefix,
 		HTTPClient: &http.Client{
 			Timeout: c.RequestTimeout,
 		},
