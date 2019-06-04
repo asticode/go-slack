@@ -45,6 +45,9 @@ type Field struct {
 func (s *Slack) Slack(m Message) (err error) {
 	// TODO Make sure texts are HTML encoded
 
+	// Add channel prefix
+	m.Channel = s.ChannelPrefix + m.Channel
+
 	// Encode message
 	var b []byte
 	if b, err = json.Marshal(m); err != nil {
