@@ -6,12 +6,16 @@ import (
 )
 
 // Message represents a message
+//https://api.slack.com/messaging/sending
+//https://api.slack.com/reference/messaging/payload
 type Message struct {
 	Attachments []Attachment `json:"attachments,omitempty"`
 	Channel     string       `json:"channel"`
 	Markdown    bool         `json:"mrkdwn,omitempty"`
 	Text        string       `json:"text,omitempty"`
 	Username    string       `json:"username,omitempty"`
+	IconeURL    string       `json:"icon_url,omitempty"`
+	IconeEmoji  string       `json:"icon_emoji,omitempty"`
 }
 
 // Attachment represents an attachments
